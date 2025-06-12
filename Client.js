@@ -4,9 +4,13 @@ import express from 'express';
 import axios from 'axios';
 import open from 'open';
 import qs from 'querystring';
+import crypto from 'crypto';
 
 const app = express();
 const port = 4000;
+
+// In-memory store for state and nonce (should be per-session in real app)
+const store = new Map();
 
 // Config
 const config = {
@@ -16,26 +20,31 @@ const config = {
   authorize_endpoint: 'https://sandbox-sso.g99.vn/auth',
   token_endpoint: 'https://sandbox-sso.g99.vn/token',
   userinfo_endpoint: 'https://sandbox-sso.g99.vn/me',
-  scope: 'openid profile',
+  scope: 'openid profile email cccd',
 };
 
 // Step 1: Redirect user to authorization endpoint
 app.get('/login', (req, res) => {
-  const state = 'abc123';
-  const nonce = 'xyz456';
+  const state = crypto.randomBytes(8).toString('hex');
+  const nonce = crypto.randomBytes(8).toString('hex');
+  store.set(state, { nonce });
+
   const url = `${config.authorize_endpoint}?client_id=${config.client_id}&redirect_uri=${encodeURIComponent(
     config.redirect_uri
   )}&response_type=code&scope=${encodeURIComponent(
     config.scope
   )}&state=${state}&nonce=${nonce}`;
 
+  console.log(url);
   res.redirect(url);
 });
 
 // Step 2: Receive authorization code and exchange for tokens
 app.get('/callback', async (req, res) => {
-  const { code } = req.query;
-  if (!code) return res.send('Missing code');
+  const { code, state } = req.query;
+  if (!code || !state || !store.has(state)) {
+    return res.status(400).send('Invalid state or missing code');
+  }
 
   try {
     const tokenRes = await axios.post(
@@ -70,6 +79,8 @@ app.get('/callback', async (req, res) => {
   } catch (err) {
     console.error('❌ Error:', err.response?.data || err.message);
     res.status(500).send('Token exchange failed');
+  } finally {
+    store.delete(state);
   }
 });
 

@@ -20,7 +20,7 @@ const config = {
   authorize_endpoint: 'https://sandbox-sso.g99.vn/auth',
   token_endpoint: 'https://sandbox-sso.g99.vn/token',
   userinfo_endpoint: 'https://sandbox-sso.g99.vn/me',
-  scope: 'openid profile email cccd',
+  scope: 'openid profile',
 };
 
 // Step 1: Redirect user to authorization endpoint

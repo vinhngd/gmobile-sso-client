@@ -14,13 +14,13 @@ const store = new Map();
 
 // Config
 const config = {
-  client_id: 'dummy',
-  client_secret: 'dummy',
+  client_id: 'Edukid',
+  client_secret: 'aatom@123',
   redirect_uri: 'http://localhost:4000/callback',
   authorize_endpoint: 'https://sandbox-sso.g99.vn/auth',
   token_endpoint: 'https://sandbox-sso.g99.vn/token',
   userinfo_endpoint: 'https://sandbox-sso.g99.vn/me',
-  scope: 'openid profile',
+  scope: 'openid profile number',
 };
 
 // Step 1: Redirect user to authorization endpoint
